@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  ReportsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: Reports
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: N
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: createdAt
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: byId
+          KeySchema:
+            - AttributeName: id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+Outputs:
+  ReportsTableName:
+    Value: Reports
+
+
