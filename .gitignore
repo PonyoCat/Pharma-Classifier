@@ -1,0 +1,48 @@
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Python / FastAPI ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+/.venv/
+.env
+.env.*
+!.env.example
+
+# --- Node / React (JSX) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite/CRA build output:
+# Hvis du DEPLOYER frontenden via EB Nginx fra dist/build, så LAD VÆRE med at ignore den mappe.
+# Ellers kan du ignorere den lokalt:
+# frontend/dist/
+# frontend/build/
+
+# --- Docker ---
+*.pid
+*.pid.lock
+docker-compose.override.yml
+
+# --- Editors/IDE ---
+.vscode/
+.idea/
+
+# --- AWS EB CLI (behold config.yml) ---
+.elasticbeanstalk/*
+!.elasticbeanstalk/config.yml
+
+# --- Misc ---
+*.log

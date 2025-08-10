@@ -41,6 +41,7 @@ def analyze_text(text: str) -> Dict[str, Any]:
 
     sentiment = "UNKNOWN"
     score = 0.0
+
     try:
         s = comprehend.detect_sentiment(Text=text, LanguageCode="en")
         sentiment = s.get("Sentiment", "UNKNOWN")
@@ -51,19 +52,20 @@ def analyze_text(text: str) -> Dict[str, Any]:
     except ClientError as e:
         logger.exception("detect_sentiment fejlede: %s", e)
 
-    entities: List[Dict[str, Any]] = []
-    labels: List[str] = []
     try:
-        e = comprehend.detect_entities(Text=text, LanguageCode="en")
-        raw = e.get("Entities", []) or []
-        entities = [
-            {"text": it.get("Text", ""), "type": it.get("Type", ""), "score": float(it.get("Score", 0.0))}
-            for it in raw
-        ]
-        labels = sorted({it.get("Type", "") for it in raw if it.get("Type")})
+        resp = comprehend.detect_entities(Text=text, LanguageCode="en")
+        raw = resp.get("Entities", []) or []
+        entities = [{
+            "value": it.get("Text", ""),
+            "type": it.get("Type", "OTHER"),
+            "start_index": int(it["BeginOffset"]) if it.get("BeginOffset") is not None else None,
+            "end_index": int(it["EndOffset"]) if it.get("EndOffset") is not None else None,
+        } for it in raw]
+        labels = sorted({e["type"] for e in entities if e.get("type")})
         logger.info("detect_entities ok: entities=%d labels=%d", len(entities), len(labels))
-    except ClientError as e:
-        logger.exception("detect_entities fejlede: %s", e)
+    except ClientError:
+        logger.exception("detect_entities fejlede")
+        entities, labels = [], []
 
     return {"labels": labels, "entities": entities, "score": score, "sentiment": sentiment, "summary": ""}
 
