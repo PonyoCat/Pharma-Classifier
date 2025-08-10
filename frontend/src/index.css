@@ -1,0 +1,16 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, Arial, sans-serif; background: #0b0b0b; color: #f3f3f3; }
+.container { max-width: 760px; margin: 24px auto; padding: 16px; }
+h1 { font-size: 22px; margin: 0 0 12px; }
+h2 { font-size: 18px; margin: 0 0 8px; }
+.card { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 12px; margin: 12px 0; }
+label { display: block; font-size: 14px; margin-bottom: 6px; }
+textarea { width: 100%; background: #0f0f0f; color: #e6e6e6; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px; resize: vertical; }
+button { margin-top: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #2a2a2a; background: #1f6feb; color: white; cursor: pointer; }
+button[disabled] { opacity: .6; cursor: not-allowed; }
+.meta { font-size: 12px; opacity: .7; }
+.text { margin: 6px 0 8px; white-space: pre-wrap; }
+.labels { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.chip { font-size: 12px; background: #1e1e1e; border: 1px solid #2a2a2a; padding: 2px 8px; border-radius: 999px; }
+.score { font-size: 14px; opacity: .9; }
+.error { margin-top: 8px; color: #ff6b6b; }
