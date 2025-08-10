@@ -1,5 +1,6 @@
 # backend/app/main.py
 
+from decimal import Decimal
 import os, time, uuid 
 from typing import List
 from dotenv import load_dotenv
@@ -31,7 +32,7 @@ CORS_ORIGIN = os.getenv("CORS_ORIGIN", "http://localhost:5173")
 AWS_DDB_ENDPOINT = os.getenv("AWS_DDB_ENDPOINT")  # fx "http://dynamodb:8000" i docker
 
 # Opretter forbindelse til vores database 
-ddb = boto3.resource("dynamodb", region_name=AWS_REGION, endpoint_url=AWS_DDB_ENDPOINT)
+ddb = boto3.resource("dynamodb", region_name=AWS_REGION)
 table = ddb.Table(TABLE_NAME)
 
 # --- logging konfiguration ---
@@ -74,10 +75,6 @@ app.add_middleware( # kommunikation mellem frontend og backend
     allow_headers=["*"],
 )
 
-# Opretter forbindelse til vores database 
-ddb = boto3.resource("dynamodb", region_name=AWS_REGION)
-table = ddb.Table(TABLE_NAME)
-
 # --- request logging middleware (bevarer dine egne kommentarer uændret) ---
 @app.middleware("http")
 async def log_requests(request, call_next):
@@ -114,6 +111,12 @@ def analyze(input: AnalyzeIn): # Definer funktion og AnalyzeIn er input
     """
     result = analyze_text(input.text) # Modtager tekst fra analyzer.py funktionen
 
+    score_raw = result.get("score", 0.0)
+    try:
+     score_db = Decimal(str(score_raw))
+    except Exception:
+     score_db = Decimal("0")
+
     now = int(time.time())
     item = { # Udfylder felter i din database ud fra input og analyse resultat
         "userId": DEMO_USER,
@@ -122,24 +125,29 @@ def analyze(input: AnalyzeIn): # Definer funktion og AnalyzeIn er input
         "text": input.text,
         "labels": result.get("labels", []),
         "entities": result.get("entities", []),
-        "score": float(result.get("score", 0.0)),
+        "score": score_db,
         "sentiment": result.get("sentiment", "UNKNOWN"),
         "summary": result.get("summary", ""),
         "source": "manual",
     }
 
+    
+    
     try:
         table.put_item(Item=item) # Gemmer hele item i tabellen
         logger.info(
-            "saved report id=%s labels=%d entities=%d sentiment=%s score=%.3f",
+            "saved report id=%s labels=%d entities=%d sentiment=%s score=%s",
             item["id"], len(item["labels"]), len(item["entities"]), item["sentiment"], item["score"]
         )
     except ClientError as e:
         logger.exception("dynamodb put_item failed: %s", e)
         raise HTTPException(status_code=500, detail="Failed to store item")
-
-    # FastAPI will auto convert this dict to ReportOut because of response_model
-    return item
+    response_item = dict(item)
+    try:
+        response_item["score"] = float(response_item["score"])
+    except Exception:
+        response_item["score"] = 0.0
+    return response_item
 
 # Funktion henter seneste 10 items for en bruger ID
 @app.get("/reports", response_model=List[ReportOut])

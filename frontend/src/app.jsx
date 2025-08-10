@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { submitNote } from "./lib/api";
+import { submitNote } from "./library/api";
 import "./index.css";
 
 export default function App() { 
